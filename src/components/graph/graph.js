@@ -65,7 +65,9 @@ const chartConfig = {
             y: {
                 beginAtZero: true
             }
-        }
+        },
+        responsive: true,
+        maintainAspectRatio: false
     }
 };
 
@@ -129,7 +131,7 @@ const Graph = (props) => {
     }, [props.newData, chartInstance]);
 
     return (
-        <div>
+        <div className='graph-container'>
             <canvas className='graph' ref={chartContainer}/>
         </div>
     );

@@ -15,6 +15,20 @@
   gap: 10px;
 }
 
+.dataAdd {
+  display: grid;
+  grid-template-columns: max-content auto;
+  gap: 10px;
+}
+
+.buttonLabel {
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  gap: 10;
+  margin: 10px;
+}
+
 .controls {
   display: flex;
   flex-direction: column;

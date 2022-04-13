@@ -2,8 +2,6 @@ import './graph.css';
 import { useState, useEffect, useRef } from "react";
 import Chart from 'chart.js/auto'; 
 
-//var notifyCharacteristic;
-
 /**
  * Draws a linear gradient from the top to the bottom of a context
  * Used with a graph to apply a color gradient
@@ -85,6 +83,7 @@ const Graph = (props) => {
 
                 setChartInstance(newChartInstance);               
             } catch (error) {
+                console.log(error);
                 console.log("Graph already exists, not redrawing");
             }
         }
@@ -120,15 +119,48 @@ const Graph = (props) => {
      * Updated the graph with new data when added
      */
     useEffect(() => {
-        console.log(props.newData.nextTemp);
         if (chartInstance != null && props.newData.nextTemp != null) {
-            const d = new Date(Date.now()).toLocaleTimeString();
-            
+
+            const d = new Date(Date.now());
+
+            let timeString = d.getHours().toString() + ':' + d.getMinutes().toString() + ':' + d.getSeconds().toString() + ':' + d.getMilliseconds().toString();
+
+            var chartLength = chartInstance.data.labels.length;
+            var maxPoints = props.maxPoints.max;
+
+            if (chartLength - 3 > maxPoints) {
+                console.log("CLEAR END BUFFER");
+                chartInstance.data.labels.shift();
+                chartInstance.data.datasets[0].data.shift();
+                chartInstance.scales.x.options.min = chartInstance.data.labels[4];
+            } else if (chartLength >= maxPoints) {
+                console.log("ADD TO BUFFER");
+                chartInstance.scales.x.options.min = chartInstance.data.labels[chartLength - maxPoints + 1];
+            }
+
             chartInstance.data.datasets[0].data.push(props.newData.nextTemp);
-            chartInstance.data.labels.push(d);
+            chartInstance.data.labels.push(timeString);    
+
             chartInstance.update();
         }
+        
     }, [props.newData, chartInstance]);
+
+    useEffect(() => {
+        if (chartInstance != null) {
+            var chartLength = chartInstance.data.labels.length;
+            var chartDif = chartLength - props.maxPoints.max;
+
+            console.log(chartDif);
+
+            if (chartDif > 0) {
+                chartInstance.data.datasets[0].data = chartInstance.data.datasets[0].data.slice(chartDif);
+                chartInstance.data.labels = chartInstance.data.labels.slice(chartDif);
+                chartInstance.scales.x.options.min = chartInstance.data.labels[0];
+                chartInstance.update();
+            }     
+        }
+    }, [props.maxPoints]);
 
     return (
         <div className='graph-container'>

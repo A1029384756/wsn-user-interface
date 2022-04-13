@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useEffect } from 'react'; 
 import Graph from './components/graph/graph.js';
-import { Button, MenuItem, Select } from '@mui/material';
+import { Button, ButtonGroup, MenuItem, Select } from '@mui/material';
 import { useState } from "react";
 
 var notifyCharacteristic;
@@ -10,6 +10,19 @@ var tempFormula;
 const App = () => {
   const [displayUnits, setDisplayUnits] = useState("farenheit");
   const handleDisplayUnits = (e) => setDisplayUnits(e.target.value);
+
+  const [maxPoints, setMaxPoints] = useState({max: 5});
+  const handleMaxPoints = (e) => setMaxPoints(prevMax => {
+    var max;
+
+    if (e.target.id === 'add') {
+      max = prevMax.max + 1;
+    } else if (e.target.id === 'subtract') {
+      max = prevMax.max - 1;
+    }
+
+    return {...prevMax, max};
+  });
 
   const [newData, setNewData] = useState({nextTemp: null});
   const handleNewData = (e) => setNewData(prevTemp => {
@@ -67,7 +80,7 @@ const App = () => {
 
   return (
     <div>
-      <Graph displayUnits={displayUnits} newData={newData}/>
+      <Graph displayUnits={displayUnits} newData={newData} maxPoints={maxPoints}/>
       <div className='controls'>
         <div className='dataManip'>
             <Select value={displayUnits} onChange={handleDisplayUnits}>
@@ -76,7 +89,14 @@ const App = () => {
             </Select>
             <Button variant='contained' onClick={handleNewData}>Add data</Button>
         </div>
-        <Button variant='contained' onClick={connectBluetooth}>Connect Bluetooth</Button>
+        <div className='dataAdd'>
+          <ButtonGroup variant='contained'>
+            <Button id='subtract' onClick={handleMaxPoints}>-</Button>
+            <div className='buttonLabel'>{maxPoints.max}</div>
+            <Button id='add' onClick={handleMaxPoints}>+</Button>
+          </ButtonGroup>
+          <Button variant='contained' onClick={connectBluetooth}>Connect Bluetooth</Button>
+        </div>
       </div>
     </div>
   );

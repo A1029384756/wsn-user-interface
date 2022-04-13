@@ -72,6 +72,7 @@ const chartConfig = {
 const Graph = (props) => {
     const chartContainer = useRef(null);
     const [chartInstance, setChartInstance] = useState(null);
+    const pointLimit = useRef(props.maxPoints.max);
 
     /**
      * Creates a chart instance on the canvas if one does not currently exist
@@ -126,16 +127,16 @@ const Graph = (props) => {
             let timeString = d.getHours().toString() + ':' + d.getMinutes().toString() + ':' + d.getSeconds().toString() + ':' + d.getMilliseconds().toString();
 
             var chartLength = chartInstance.data.labels.length;
-            var maxPoints = props.maxPoints.max;
+            console.log(pointLimit.current);
 
-            if (chartLength - 3 > maxPoints) {
+            if (chartLength - 3 > pointLimit.current) {
                 console.log("CLEAR END BUFFER");
                 chartInstance.data.labels.shift();
                 chartInstance.data.datasets[0].data.shift();
                 chartInstance.scales.x.options.min = chartInstance.data.labels[4];
-            } else if (chartLength >= maxPoints) {
+            } else if (chartLength >= pointLimit.current) {
                 console.log("ADD TO BUFFER");
-                chartInstance.scales.x.options.min = chartInstance.data.labels[chartLength - maxPoints + 1];
+                chartInstance.scales.x.options.min = chartInstance.data.labels[chartLength - pointLimit.current + 1];
             }
 
             chartInstance.data.datasets[0].data.push(props.newData.nextTemp);
@@ -144,12 +145,13 @@ const Graph = (props) => {
             chartInstance.update();
         }
         
-    }, [props.newData, chartInstance]);
+    }, [props.newData, chartInstance, pointLimit]);
 
     useEffect(() => {
         if (chartInstance != null) {
             var chartLength = chartInstance.data.labels.length;
             var chartDif = chartLength - props.maxPoints.max;
+            pointLimit.current = props.maxPoints.max;
 
             console.log(chartDif);
 
@@ -160,7 +162,7 @@ const Graph = (props) => {
                 chartInstance.update();
             }     
         }
-    }, [props.maxPoints]);
+    }, [props.maxPoints, chartInstance, pointLimit]);
 
     return (
         <div className='graph-container'>

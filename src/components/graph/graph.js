@@ -127,40 +127,46 @@ const Graph = (props) => {
             let timeString = d.getHours().toString() + ':' + d.getMinutes().toString() + ':' + d.getSeconds().toString() + ':' + d.getMilliseconds().toString();
 
             var chartLength = chartInstance.data.labels.length;
-            console.log(pointLimit.current);
 
             if (chartLength - 3 > pointLimit.current) {
-                console.log("CLEAR END BUFFER");
-                chartInstance.data.labels.shift();
                 chartInstance.data.datasets[0].data.shift();
+                chartInstance.data.labels.shift();
                 chartInstance.scales.x.options.min = chartInstance.data.labels[4];
             } else if (chartLength >= pointLimit.current) {
-                console.log("ADD TO BUFFER");
                 chartInstance.scales.x.options.min = chartInstance.data.labels[chartLength - pointLimit.current + 1];
             }
 
             chartInstance.data.datasets[0].data.push(props.newData.nextTemp);
-            chartInstance.data.labels.push(timeString);    
+            chartInstance.data.labels.push(timeString);
 
             chartInstance.update();
         }
         
     }, [props.newData, chartInstance, pointLimit]);
 
+    /**
+     * Updates the length of the graph to fit a user-selected prop
+     */
     useEffect(() => {
         if (chartInstance != null) {
-            var chartLength = chartInstance.data.labels.length;
-            var chartDif = chartLength - props.maxPoints.max;
+            var chartDif = chartInstance.data.labels.length - props.maxPoints.max;
+
+            if (pointLimit.current > props.maxPoints.max) {
+                for (let i = 0; i < chartDif - 1; i++) {
+                    chartInstance.data.labels.shift();
+                    chartInstance.data.datasets[0].data.shift();
+                }
+
+                chartInstance.scales.x.options.min = chartInstance.data.labels[1];
+            } else {
+                for (let i = 0; i < chartDif; i++) {
+                    chartInstance.data.labels.shift();
+                    chartInstance.data.datasets[0].data.shift();
+                }
+            }
+
             pointLimit.current = props.maxPoints.max;
-
-            console.log(chartDif);
-
-            if (chartDif > 0) {
-                chartInstance.data.datasets[0].data = chartInstance.data.datasets[0].data.slice(chartDif);
-                chartInstance.data.labels = chartInstance.data.labels.slice(chartDif);
-                chartInstance.scales.x.options.min = chartInstance.data.labels[0];
-                chartInstance.update();
-            }     
+            chartInstance.update();
         }
     }, [props.maxPoints, chartInstance, pointLimit]);
 
